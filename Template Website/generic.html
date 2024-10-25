@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>AI Model Interface</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <!-- Include your main CSS file -->
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <!-- Fallback for users with JavaScript disabled -->
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+<body class="is-preload">
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header id="header">
+            <h1>AI Model Interface</h1>
+            <p>Enter your input below, and the model will process it.</p>
+        </header>
+
+        <!-- Main -->
+        <div id="main">
+
+            <!-- Input Form -->
+            <section id="content" class="main">
+                <h2>Input Data</h2>
+
+                <form id="inputForm">
+                    <textarea id="userInput" rows="10" placeholder="Enter your text here"></textarea>
+                    <button type="submit">Process Input</button>
+                </form>
+
+                <!-- Result Display -->
+                <h2>Model Output</h2>
+                <textarea id="outputResult" rows="10" placeholder="Output will be displayed here"></textarea>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer id="footer">
+            <p>&copy; 2024 Your Name. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- Scripts -->
+    <!-- Include jQuery if needed -->
+    <script src="assets/js/jquery.min.js"></script>
+    <!-- Include DOMPurify from CDN for sanitization -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+    <!-- Include your main JS file -->
+    <script src="assets/js/main.js"></script>
+
+    <script>
+        // Handle form submission
+        document.getElementById("inputForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            // Get user input
+            let userText = document.getElementById("userInput").value;
+
+            // Send data to the backend via POST request
+            let response = await fetch('http://localhost:5000/process_input', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_text: userText }),
+            });
+
+            // Process response
+            let result = await response.json();
+            if (response.ok) {
+                // Sanitize the output using DOMPurify
+                let sanitizedOutput = DOMPurify.sanitize(result.output);
+
+                // Display the sanitized output with formatting
+                document.getElementById("outputResult").innerHTML = sanitizedOutput;
+            } else {
+                // Display error message
+                document.getElementById("outputResult").textContent = `Error: ${result.error}`;
+            }
+        });
+
+        // Function to adjust the height of the output textarea based on content
+        function resizeOutputResult() {
+            const outputResult = document.getElementById("outputResult");
+            outputResult.style.height = "auto";
+            outputResult.style.height = outputResult.scrollHeight + "px";
+        }
+
+        // Call the function initially to adjust the height based on the content
+        resizeOutputResult();
+
+        // Add an event listener for textarea changes
+        document.getElementById("outputResult").addEventListener("input", resizeOutputResult);
+    </script>
+</body>
+</html>
